@@ -1,0 +1,19 @@
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap');
+@import "tailwindcss";
+
+:root {
+  font-family: 'Lato', sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  background-color: #181A1C;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+html, body, #root {
+  font-family: 'Lato', sans-serif;
+}
+
+* {
+  font-family: inherit;
+}
