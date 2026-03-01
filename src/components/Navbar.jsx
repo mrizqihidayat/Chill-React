@@ -11,7 +11,7 @@ import logo2 from "../assets/logo2.svg";
 const navigation = [
   { name: 'Series', href: '#', current: true },
   { name: 'Film', href: '#', current: false },
-  { name: 'Daftar Saya', href: '#', current: false },
+  { name: 'Daftar Saya', href: '/MyList', current: false },
 ]
 
 function classNames(...classes) {
@@ -27,19 +27,21 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="bg-[#22282A] px-4 py-5 flex justify-between items-center sticky top-0 z-1000 md:px-8 md:py-6">
+    <nav className="bg-[#22282A] px-4 py-5 flex justify-between items-center sticky top-0 z-[1000] md:px-8 md:py-6">
 
         <div className="flex gap-4 md:gap-[60px] items-center">
           <img
             alt="CHILL"
             src={logo}
             className="hidden h-10 w-auto cursor-pointer md:inline"
+            onClick={() => navigate("/home")}
           />
 
           <img
             alt="CHILL"
             src={logo2}
             className="h-5 w-auto cursor-pointer md:hidden"
+            onClick={() => navigate("/home")}
           />
 
           {navigation.map((item) => (

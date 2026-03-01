@@ -1,11 +1,39 @@
 import { useEffect, useRef, useState } from "react";
 import { topRatedData } from "../data/movie";
-import { FaArrowLeft, FaArrowRight, FaPlay, FaCheck, FaChevronDown } from "react-icons/fa6";
+import { FaArrowLeft, FaArrowRight, FaPlay, FaCheck, FaChevronDown, FaPlus } from "react-icons/fa6";
 
 export default function TopRatedSection() {
   const sliderRef = useRef(null);
   const [expandedId, setExpandedId] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
+
+  const [savedMovies, setSavedMovies] = useState([]);
+
+  const fetchSavedMovies = () => {
+    const list = JSON.parse(localStorage.getItem("myMovieList")) || [];
+    setSavedMovies(list);
+  };
+
+  useEffect(() => {
+    fetchSavedMovies();
+    window.addEventListener("myListUpdated", fetchSavedMovies);
+    return () => window.removeEventListener("myListUpdated", fetchSavedMovies);
+  }, []);
+
+  const toggleMyList = (e, movie) => {
+    e.stopPropagation();
+    let currentList = JSON.parse(localStorage.getItem("myMovieList")) || [];
+    const isExist = currentList.find((item) => item.title === movie.title);
+
+    if (isExist) {
+      currentList = currentList.filter((item) => item.title !== movie.title);
+    } else {
+      currentList.push(movie);
+    }
+
+    localStorage.setItem("myMovieList", JSON.stringify(currentList));
+    window.dispatchEvent(new Event("myListUpdated"));
+  };
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(max-width: 767px)");
@@ -63,84 +91,93 @@ export default function TopRatedSection() {
           ref={sliderRef}
           style={{ scrollbarWidth: 'none' }}
         >
-          {topRatedData.map((movie) => (
-            <div
-              key={movie.id}
-              className="relative min-w-[245px] h-[340px] shrink-0"
-              onMouseLeave={() => {
-                if (!isMobile) {
-                  setExpandedId(null);
-                }
-              }}
-            >
+          {topRatedData.map((movie) => {
+            const isFavorited = savedMovies.some((item) => item.title === movie.title);
 
+            return (
               <div
-                className="w-full h-full rounded-xl overflow-hidden cursor-pointer border border-transparent transition-all"
-                onClick={() => {
+                key={movie.id}
+                className="relative min-w-[245px] h-[340px] shrink-0"
+                onMouseLeave={() => {
                   if (!isMobile) {
-                    setExpandedId(movie.id);
+                    setExpandedId(null);
                   }
                 }}
               >
-                <img src={movie.image} alt={movie.title} className="w-full h-full object-cover" />
 
-                {movie.isNewEpisode && (
-                  <div className="absolute top-4 left-4 bg-blue-600 px-3 py-2 rounded-full shadow-lg justify-center items-center flex">
-                    <span className="text-white  font-bold text-[14px]">Episode Baru</span>
+                <div
+                  className="w-full h-full rounded-xl overflow-hidden cursor-pointer border border-transparent transition-all"
+                  onClick={() => {
+                    if (!isMobile) {
+                      setExpandedId(movie.id);
+                    }
+                  }}
+                >
+                  <img src={movie.image} alt={movie.title} className="w-full h-full object-cover" />
+
+                  {movie.isNewEpisode && (
+                    <div className="absolute top-4 left-4 bg-blue-600 px-3 py-2 rounded-full shadow-lg justify-center items-center flex">
+                      <span className="text-white  font-bold text-[14px]">Episode Baru</span>
+                    </div>
+                  )}
+
+                  <span className="absolute top-2 right-4 text-4xl font-bold text-white drop-shadow-md opacity-80">
+                    {movie.id}
+                  </span>
+                </div>
+
+                {expandedId === movie.id && (
+                  <div
+                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[340px] h-[350px] bg-[#181A1C] rounded-xl shadow-2xl overflow-hidden scale-110 transition-all duration-300 border border-gray-700"
+                  >
+                    <div className="relative h-[220px]">
+                      <img src={movie.image} alt={movie.title} className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-linear-to-t from-[#181A1C] to-transparent" />
+                      <h4 className="absolute bottom-2 left-4 text-white font-bold text-lg drop-shadow-md">
+                        {movie.title}
+                      </h4>
+                    </div>
+
+                    <div className="p-4 flex flex-col gap-3">
+
+                      <div className="flex items-center gap-2">
+                        <button className="bg-white text-black rounded-full p-2 hover:bg-gray-200 transition">
+                          <FaPlay size={16} className="ml-0.5" />
+                        </button>
+
+                        <button
+                          className="border border-gray-400 text-white rounded-full p-2 hover:border-white transition"
+                          onClick={(e) => toggleMyList(e, movie)}
+                        >
+                          {isFavorited ? <FaCheck size={16} /> : <FaPlus size={16} />}
+                        </button>
+
+                        <button className="border border-gray-400 text-white rounded-full p-2 ml-auto hover:border-white transition">
+                          <FaChevronDown size={16} />
+                        </button>
+                      </div>
+
+                      <div className="flex items-center gap-3 text-white text-xs font-medium">
+                        <span className="text-green-400">98% Cocok</span>
+                        <span className="border border-gray-500 px-1 rounded text-[10px]">{movie.rating}</span>
+                        <span className="text-gray-300">{movie.duration}</span>
+                      </div>
+
+                      <div className="flex flex-wrap gap-2">
+                        {movie.genres.map((genre, index) => (
+                          <span key={index} className="text-xs text-gray-400 flex items-center">
+                            {genre} {index < movie.genres.length - 1 && <span className="mx-1">•</span>}
+                          </span>
+                        ))}
+                      </div>
+
+                    </div>
                   </div>
                 )}
 
-                <span className="absolute top-2 right-4 text-4xl font-bold text-white drop-shadow-md opacity-80">
-                  {movie.id}
-                </span>
               </div>
-
-              {expandedId === movie.id && (
-                <div
-                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[340px] h-[350px] bg-[#181A1C] rounded-xl shadow-2xl overflow-hidden scale-110 transition-all duration-300 border border-gray-700"
-                >
-                  <div className="relative h-[220px]">
-                    <img src={movie.image} alt={movie.title} className="w-full h-full object-cover" />
-                    <div className="absolute inset-0 bg-linear-to-t from-[#181A1C] to-transparent" />
-                    <h4 className="absolute bottom-2 left-4 text-white font-bold text-lg drop-shadow-md">
-                      {movie.title}
-                    </h4>
-                  </div>
-
-                  <div className="p-4 flex flex-col gap-3">
-
-                    <div className="flex items-center gap-2">
-                      <button className="bg-white text-black rounded-full p-2 hover:bg-gray-200 transition">
-                        <FaPlay size={16} className="ml-0.5" />
-                      </button>
-                      <button className="border border-gray-400 text-white rounded-full p-2 hover:border-white transition">
-                        <FaCheck size={16} />
-                      </button>
-                      <button className="border border-gray-400 text-white rounded-full p-2 ml-auto hover:border-white transition">
-                        <FaChevronDown size={16} />
-                      </button>
-                    </div>
-
-                    <div className="flex items-center gap-3 text-white text-xs font-medium">
-                      <span className="text-green-400">98% Cocok</span>
-                      <span className="border border-gray-500 px-1 rounded text-[10px]">{movie.rating}</span>
-                      <span className="text-gray-300">{movie.duration}</span>
-                    </div>
-
-                    <div className="flex flex-wrap gap-2">
-                      {movie.genres.map((genre, index) => (
-                        <span key={index} className="text-xs text-gray-400 flex items-center">
-                          {genre} {index < movie.genres.length - 1 && <span className="mx-1">•</span>}
-                        </span>
-                      ))}
-                    </div>
-
-                  </div>
-                </div>
-              )}
-
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         <button
