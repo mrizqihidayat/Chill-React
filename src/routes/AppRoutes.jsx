@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
@@ -15,10 +16,22 @@ function PublicOnlyRoute({ children }) {
 }
 
 export default function AppRoutes() {
+  const [savedMovies, setSavedMovies] = useState([]);
+
+  const toggleMyList = (movie) => {
+    setSavedMovies((prevList) => {
+      const isExist = prevList.find((item) => item.title === movie.title);
+      if (isExist) {
+        return prevList.filter((item) => item.title !== movie.title);
+      } else {
+        return [...prevList, movie];
+      }
+    });
+  };
+
   return (
     <Routes>
       <Route path="/" element={<Navigate to="/login" replace />} />
-
       <Route path="/login" element={<PublicOnlyRoute><Login /></PublicOnlyRoute>} />
       <Route path="/register" element={<PublicOnlyRoute><Register /></PublicOnlyRoute>} />
       
@@ -26,21 +39,19 @@ export default function AppRoutes() {
         path="/home"
         element={
           <ProtectedRoute>
-            <Home />
+            <Home savedMovies={savedMovies} toggleMyList={toggleMyList} />
           </ProtectedRoute>
         }
       />
 
       <Route
-        path="/MyList"
+        path="/mylist"
         element={
           <ProtectedRoute>
-            <MyList />
+            <MyList savedMovies={savedMovies} toggleMyList={toggleMyList} />
           </ProtectedRoute>
         }
       />
-
-      <Route path="/mylist" element={<Navigate to="/MyList" replace />} />
     </Routes>
   );
 }

@@ -1,5 +1,5 @@
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { GoChevronDown } from "react-icons/go";
 import { IoStar } from "react-icons/io5";
 import { FaSignOutAlt } from "react-icons/fa";
@@ -11,7 +11,7 @@ import logo2 from "../assets/logo2.svg";
 const navigation = [
   { name: 'Series', href: '#', current: true },
   { name: 'Film', href: '#', current: false },
-  { name: 'Daftar Saya', href: '/MyList', current: false },
+  { name: 'Daftar Saya', href: '/mylist', current: false }, 
 ]
 
 function classNames(...classes) {
@@ -45,9 +45,9 @@ export default function Navbar() {
           />
 
           {navigation.map((item) => (
-            <a
+            <Link
               key={item.name}
-              href={item.href}
+              to={item.href}
               aria-current={item.current ? 'page' : undefined}
               className={classNames(
                 item.current ? 'text-white' : 'text-white',
@@ -55,7 +55,7 @@ export default function Navbar() {
               )}
             >
               {item.name}
-            </a>
+            </Link>
           ))}
         </div>
 
@@ -95,8 +95,11 @@ export default function Navbar() {
             <MenuItem
               as="a"
               href="#"
-              className="flex items-center gap-2 px-4 py-2.5 text-[14px] text-white hover:bg-white/10"
-              onClick={handleLogout}
+              className="flex items-center gap-2 px-4 py-2.5 text-[14px] text-white hover:bg-white/10 cursor-pointer"
+              onClick={(e) => {
+                e.preventDefault();
+                handleLogout();
+              }}
             >
               <FaSignOutAlt className="h-5 w-5" />
               Keluar

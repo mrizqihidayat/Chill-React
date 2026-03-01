@@ -1,26 +1,23 @@
-import Navbar from '../components/Navbar'
-import HeroSection from '../components/HeroSection'
-import Footer from '../components/Footer'
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
+import HeroSection from "../components/HeroSection";
 import ContinueSection from "../components/ContinueSection";
-import TopRatedSection from '../components/TopRatedSection';
-import TrendingSection from '../components/TrendingSection';
-import NewReleaseSection from '../components/NewReleaseSection';
+import TrendingSection from "../components/TrendingSection";
+import TopRatedSection from "../components/TopRatedSection";
+import NewReleaseSection from "../components/NewReleaseSection";
 
-function Home() {
-
+export default function Home({ savedMovies, toggleMyList }) {
   return (
-    <>
+    <div className="bg-[#181A1C] min-h-screen text-white overflow-x-hidden">
       <Navbar />
-      <main>
-        <HeroSection />
-        <ContinueSection />
-        <TopRatedSection />
-        <TrendingSection />
-        <NewReleaseSection />
-      </main>
-      <Footer />
-    </>
-  )
-}
+      <HeroSection />
+      <ContinueSection />
 
-export default Home
+      <TrendingSection savedMovies={savedMovies} toggleMyList={toggleMyList} />
+      <TopRatedSection savedMovies={savedMovies} toggleMyList={toggleMyList} />
+      <NewReleaseSection savedMovies={savedMovies} toggleMyList={toggleMyList} />
+      
+      <Footer />
+    </div>
+  );
+}

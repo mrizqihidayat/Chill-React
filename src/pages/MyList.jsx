@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
-import Navbar from "../components/Navbar";
+import Navbar from "../components/Navbar"; 
 import Footer from "../components/Footer";
 import { FaPlay, FaTrash, FaChevronDown } from "react-icons/fa6";
 
-export default function MyList() {
-  const [savedMovies, setSavedMovies] = useState([]);
+export default function MyList({ savedMovies, toggleMyList }) {
   const [expandedId, setExpandedId] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -21,27 +20,6 @@ export default function MyList() {
     return () => mediaQuery.removeListener(handleChange);
   }, []);
 
-  const fetchSavedMovies = () => {
-    const list = JSON.parse(localStorage.getItem("myMovieList")) || [];
-    setSavedMovies(list);
-  };
-
-  useEffect(() => {
-    fetchSavedMovies();
-    window.addEventListener("myListUpdated", fetchSavedMovies);
-    return () => window.removeEventListener("myListUpdated", fetchSavedMovies);
-  }, []);
-
-  const removeMovie = (e, title) => {
-    e.stopPropagation();
-    let currentList = JSON.parse(localStorage.getItem("myMovieList")) || [];
-    currentList = currentList.filter((item) => item.title !== title);
-
-    localStorage.setItem("myMovieList", JSON.stringify(currentList));
-    window.dispatchEvent(new Event("myListUpdated"));
-    setExpandedId(null);
-  };
-
   return (
     <div className="bg-[#181A1C] min-h-screen text-white flex flex-col">
       <Navbar />
@@ -57,22 +35,23 @@ export default function MyList() {
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6 pb-20 pt-6">
             {savedMovies.map((movie, index) => {
-
-              const isLeftEdge = index % 5 === 0;
+              
+              const isLeftEdge = index % 5 === 0; 
               const isRightEdge = (index + 1) % 5 === 0;
               let positionClass = "left-1/2 -translate-x-1/2 origin-center";
               if (isLeftEdge) positionClass = "left-0 origin-left";
               if (isRightEdge) positionClass = "right-0 origin-right";
 
               return (
-                <div
-                  key={index}
+                <div 
+                  key={index} 
                   className={`relative w-full aspect-[2/3] shrink-0 transition-all ${expandedId === movie.title ? 'z-50' : 'z-0'}`}
                   onMouseLeave={() => !isMobile && setExpandedId(null)}
                 >
+                  
                   <div
                     className="w-full h-full rounded-xl overflow-hidden cursor-pointer border border-transparent transition-all"
-                    onClick={() => !isMobile && setExpandedId(movie.title)}
+                    onClick={() => setExpandedId(movie.title)}
                   >
                     <img src={movie.image} alt={movie.title} className="w-full h-full object-cover" />
 
@@ -102,19 +81,22 @@ export default function MyList() {
                           <button className="bg-white text-black rounded-full p-2 hover:bg-gray-200 transition">
                             <FaPlay size={16} className="ml-0.5" />
                           </button>
-
-                          <button
+                          
+                          <button 
                             className="border border-red-500 text-red-500 rounded-full p-2 hover:bg-red-500 hover:text-white transition"
-                            onClick={(e) => removeMovie(e, movie.title)}
+                            onClick={(e) => { e.stopPropagation(); toggleMyList(movie); setExpandedId(null); }}
                           >
                             <FaTrash size={16} />
                           </button>
-
-                          <button className="border border-gray-400 text-white rounded-full p-2 ml-auto hover:border-white transition">
+                          
+                          <button 
+                            className="border border-gray-400 text-white rounded-full p-2 ml-auto hover:border-white transition"
+                            onClick={(e) => { e.stopPropagation(); setExpandedId(null); }}
+                          >
                             <FaChevronDown size={16} />
                           </button>
                         </div>
-
+                        
                         <div className="flex items-center gap-3 text-white text-xs font-medium">
                           <span className="text-green-400">98% Cocok</span>
                           <span className="border border-gray-500 px-1 rounded text-[10px]">{movie.rating || "13+"}</span>
@@ -122,7 +104,7 @@ export default function MyList() {
                         </div>
                         <div className="flex flex-wrap gap-2">
                           {movie.genres?.map((genre, i) => (
-                            <span key={i} className="text-xs text-gray-400">{genre} {i < movie.genres.length - 1 && "•"}</span>
+                             <span key={i} className="text-xs text-gray-400">{genre} {i < movie.genres.length - 1 && "•"}</span>
                           ))}
                         </div>
                       </div>

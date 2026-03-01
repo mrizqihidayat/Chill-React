@@ -2,39 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { trendingData } from "../data/movie";
 import { FaArrowLeft, FaArrowRight, FaPlay, FaCheck, FaChevronDown, FaPlus } from "react-icons/fa6";
 
-export default function TrendingSection() {
+export default function TrendingSection({ savedMovies, toggleMyList }) {
   const sliderRef = useRef(null);
   const [expandedId, setExpandedId] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
-
-  const [savedMovies, setSavedMovies] = useState([]);
-
-  const fetchSavedMovies = () => {
-    const list = JSON.parse(localStorage.getItem("myMovieList")) || [];
-    setSavedMovies(list);
-  };
-
-  useEffect(() => {
-    fetchSavedMovies();
-    window.addEventListener("myListUpdated", fetchSavedMovies);
-    return () => window.removeEventListener("myListUpdated", fetchSavedMovies);
-  }, []);
-
-  const toggleMyList = (e, movie) => {
-    e.stopPropagation();
-    let currentList = JSON.parse(localStorage.getItem("myMovieList")) || [];
-    const isExist = currentList.find((item) => item.title === movie.title);
-
-    if (isExist) {
-      currentList = currentList.filter((item) => item.title !== movie.title);
-    } else {
-      currentList.push(movie);
-    }
-
-    localStorage.setItem("myMovieList", JSON.stringify(currentList));
-    window.dispatchEvent(new Event("myListUpdated"));
-  };
-  // -------------------------------
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(max-width: 767px)");
@@ -66,45 +37,28 @@ export default function TrendingSection() {
 
   return (
     <section className="px-2 py-[5px] md:px-16 md:py-[30px]">
-      <h3 className="text-white text-[20px] font-bold  md:text-[32px]">
-        Film Trending
-      </h3>
+      <h3 className="text-white text-[20px] font-bold md:text-[32px]">Film Trending</h3>
 
       <div className="relative group">
-
         <button
-          className="absolute left-[-25px] top-1/2 -translate-y-1/2 z-20 bg-black/50 hover:bg-black/80 text-white p-3 rounded-full items-center justify-center transition hidden md:inline"
+          className="absolute left-[-25px] top-1/2 -translate-y-1/2 z-20 bg-black/50 hover:bg-black/80 text-white p-3 rounded-full hidden md:flex items-center justify-center transition"
           onClick={() => scrollSlider("left")}
         >
           <FaArrowLeft size={20} />
         </button>
 
-        <div
-          className="flex gap-4 overflow-x-auto scroll-smooth scrollbar-hide py-6"
-          id="trendingSlider"
-          ref={sliderRef}
-          style={{ scrollbarWidth: 'none' }}
-        >
+        <div className="flex gap-4 overflow-x-auto scroll-smooth scrollbar-hide py-6" id="trendingSlider" ref={sliderRef} style={{ scrollbarWidth: 'none' }}>
           {trendingData.map((movie) => {
             const isFavorited = savedMovies.some((item) => item.title === movie.title);
 
             return (
-              <div
-                key={movie.id}
-                className="relative min-w-[245px] h-[340px] shrink-0"
-                onMouseLeave={() => {
-                  if (!isMobile) setExpandedId(null);
-                }}
-              >
+              <div key={movie.id} className="relative min-w-[245px] h-[340px] shrink-0" onMouseLeave={() => !isMobile && setExpandedId(null)}>
 
                 <div
                   className="w-full h-full rounded-xl overflow-hidden cursor-pointer border border-transparent transition-all"
-                  onClick={() => {
-                    if (!isMobile) setExpandedId(movie.id);
-                  }}
+                  onClick={() => setExpandedId(movie.id)}
                 >
                   <img src={movie.image} alt={movie.title} className="w-full h-full object-cover" />
-
                   <div className="absolute top-0 right-4 bg-[#E50914] w-[32px] h-[48px] flex flex-col items-center justify-center shadow-md">
                     <span className="text-white text-[10px] font-bold uppercase leading-none mt-1">Top</span>
                     <span className="text-white text-[18px] font-bold leading-none">10</span>
@@ -112,15 +66,11 @@ export default function TrendingSection() {
                 </div>
 
                 {expandedId === movie.id && (
-                  <div
-                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[340px] h-[350px] bg-[#181A1C] rounded-xl shadow-2xl overflow-hidden scale-110 transition-all duration-300 border border-gray-700"
-                  >
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[340px] h-[350px] bg-[#181A1C] rounded-xl shadow-2xl overflow-hidden scale-110 transition-all duration-300 border border-gray-700">
                     <div className="relative h-[220px]">
                       <img src={movie.image} alt={movie.title} className="w-full h-full object-cover" />
                       <div className="absolute inset-0 bg-gradient-to-t from-[#181A1C] to-transparent" />
-                      <h4 className="absolute bottom-2 left-4 text-white font-bold text-lg drop-shadow-md">
-                        {movie.title}
-                      </h4>
+                      <h4 className="absolute bottom-2 left-4 text-white font-bold text-lg drop-shadow-md">{movie.title}</h4>
                     </div>
 
                     <div className="p-4 flex flex-col gap-3">
@@ -131,12 +81,15 @@ export default function TrendingSection() {
 
                         <button
                           className="border border-gray-400 text-white rounded-full p-2 hover:border-white transition"
-                          onClick={(e) => toggleMyList(e, movie)}
+                          onClick={(e) => { e.stopPropagation(); toggleMyList(movie); }}
                         >
                           {isFavorited ? <FaCheck size={16} /> : <FaPlus size={16} />}
                         </button>
 
-                        <button className="border border-gray-400 text-white rounded-full p-2 ml-auto hover:border-white transition">
+                        <button
+                          className="border border-gray-400 text-white rounded-full p-2 ml-auto hover:border-white transition"
+                          onClick={(e) => { e.stopPropagation(); setExpandedId(null); }}
+                        >
                           <FaChevronDown size={16} />
                         </button>
                       </div>
@@ -163,7 +116,7 @@ export default function TrendingSection() {
         </div>
 
         <button
-          className="absolute right-[-25px] top-1/2 -translate-y-1/2 z-20 bg-black/50 hover:bg-black/80 text-white p-3 rounded-full items-center justify-center transition hidden md:inline"
+          className="absolute right-[-25px] top-1/2 -translate-y-1/2 z-20 bg-black/50 hover:bg-black/80 text-white p-3 rounded-full hidden md:flex items-center justify-center transition"
           onClick={() => scrollSlider("right")}
         >
           <FaArrowRight size={20} />
